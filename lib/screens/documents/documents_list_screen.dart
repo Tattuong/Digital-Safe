@@ -52,7 +52,7 @@ class DocumentsListScreen extends StatelessWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: docs.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) => _DocListTile(doc: docs[i]),
             ),
       floatingActionButton: FloatingActionButton(
@@ -89,11 +89,13 @@ class _DocListTile extends StatelessWidget {
           MaterialPageRoute(builder: (_) => DocumentDetailScreen(documentId: doc.id)),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: cat?.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
@@ -106,13 +108,29 @@ class _DocListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(doc.title, style: AppTypography.labelBold(size: 15)),
-                    Text(dateFmt.format(doc.updatedAt), style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12)),
+                    const SizedBox(height: 4),
+                    Text(
+                      dateFmt.format(doc.updatedAt),
+                      style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12),
+                    ),
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(doc.isFavorite ? Icons.star_rounded : Icons.star_outline, color: AppColors.coin, size: 22),
-                onPressed: () => context.read<VaultProvider>().toggleFavorite(doc.id),
+              const SizedBox(width: 8),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => context.read<VaultProvider>().toggleFavorite(doc.id),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      doc.isFavorite ? Icons.star_rounded : Icons.star_outline,
+                      color: AppColors.coin,
+                      size: 22,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -144,28 +162,37 @@ class RecentScreen extends StatelessWidget {
             child: Center(child: Text(AppStrings.t(context, 'noActivity'))),
           )
         else
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (_, i) {
-                final act = activities[i];
-                final cat = DocumentCategory.fromId(act.categoryId);
-                final typeKey = switch (act.type) {
-                  ActivityType.added => 'activityAdded',
-                  ActivityType.viewed => 'activityViewed',
-                  ActivityType.edited => 'activityEdited',
-                  ActivityType.deleted => 'activityDeleted',
-                  ActivityType.favorited => 'activityFavorited',
-                };
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: cat?.color.withValues(alpha: 0.2),
-                    child: Icon(cat?.icon ?? Icons.description, color: cat?.color, size: 20),
-                  ),
-                  title: Text('${AppStrings.t(context, typeKey)} — ${act.documentTitle}'),
-                  subtitle: Text(dateFmt.format(act.timestamp)),
-                );
-              },
-              childCount: activities.length,
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (_, i) {
+                  final act = activities[i];
+                  final cat = DocumentCategory.fromId(act.categoryId);
+                  final typeKey = switch (act.type) {
+                    ActivityType.added => 'activityAdded',
+                    ActivityType.viewed => 'activityViewed',
+                    ActivityType.edited => 'activityEdited',
+                    ActivityType.deleted => 'activityDeleted',
+                    ActivityType.favorited => 'activityFavorited',
+                  };
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: i < activities.length - 1 ? 8 : 0),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      tileColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : Colors.white,
+                      leading: CircleAvatar(
+                        backgroundColor: cat?.color.withValues(alpha: 0.2),
+                        child: Icon(cat?.icon ?? Icons.description, color: cat?.color, size: 20),
+                      ),
+                      title: Text('${AppStrings.t(context, typeKey)} — ${act.documentTitle}'),
+                      subtitle: Text(dateFmt.format(act.timestamp)),
+                    ),
+                  );
+                },
+                childCount: activities.length,
+              ),
             ),
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -196,10 +223,13 @@ class FavoritesScreen extends StatelessWidget {
           )
         else
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (_, i) => _DocListTile(doc: favorites[i]),
+                (_, i) => Padding(
+                  padding: EdgeInsets.only(bottom: i < favorites.length - 1 ? 10 : 0),
+                  child: _DocListTile(doc: favorites[i]),
+                ),
                 childCount: favorites.length,
               ),
             ),
