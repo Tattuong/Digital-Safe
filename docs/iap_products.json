@@ -1,0 +1,22 @@
+{
+  "app": "Digital Safe",
+  "applicationId": "com.digitalsafe.mng.digitalsafe",
+  "remoteConfigUrl": "https://api2.blwsmartware.net/N219.json",
+  "products": {
+    "consumables": [
+      {"id": "ds_pack_1", "type": "consumable", "coins": 50},
+      {"id": "ds_pack_2", "type": "consumable", "coins": 100},
+      {"id": "ds_pack_3", "type": "consumable", "coins": 200},
+      {"id": "ds_pack_4", "type": "consumable", "coins": 350},
+      {"id": "ds_pack_5", "type": "consumable", "coins": 500},
+      {"id": "ds_pack_6", "type": "consumable", "coins": 750},
+      {"id": "ds_pack_7", "type": "consumable", "coins": 1000},
+      {"id": "ds_pack_8", "type": "consumable", "coins": 1500},
+      {"id": "ds_pack_9", "type": "consumable", "coins": 2200},
+      {"id": "ds_pack_10", "type": "consumable", "coins": 3000}
+    ],
+    "nonConsumables": [
+      {"id": "ds_remove_ads", "type": "non_consumable"}
+    ]
+  }
+}
