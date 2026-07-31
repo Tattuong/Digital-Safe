@@ -1,6 +1,6 @@
 # Google Play IAP Products — Digital Safe
 
-**Application ID:** `com.digitalsafe.mng.digitalsafe`  
+**Application ID:** `com.digitalsafemng.digitalsafe`  
 **Remote config:** https://api2.blwsmartware.net/N219.json
 
 ## Consumable coin packs (10)

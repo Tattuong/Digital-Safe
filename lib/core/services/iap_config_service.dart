@@ -60,7 +60,7 @@ class IapRemoteConfig {
 
   static IapRemoteConfig fallback() => const IapRemoteConfig(
         name: 'Digital Safe',
-        id: 'com.digitalsafe.mng.digitalsafe',
+        id: 'com.digitalsafemng.digitalsafe',
         version: '1.0.1',
         billingDisabled: false,
         code: 'FULL_IAP',

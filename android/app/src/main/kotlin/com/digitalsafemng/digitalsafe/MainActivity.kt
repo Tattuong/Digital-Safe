@@ -1,4 +1,4 @@
-package com.digitalsafe.mng.digitalsafe
+package com.digitalsafemng.digitalsafe
 
 import io.flutter.embedding.android.FlutterActivity
 

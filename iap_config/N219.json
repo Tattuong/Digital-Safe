@@ -1,6 +1,6 @@
 {
   "name": "Digital Safe",
-  "id": "com.digitalsafe.mng.digitalsafe",
+  "id": "com.digitalsafemng.digitalsafe",
   "version": "1.0.1",
   "disable": 0,
   "code": "FULL_IAP",

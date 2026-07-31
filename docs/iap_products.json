@@ -1,6 +1,6 @@
 {
   "app": "Digital Safe",
-  "applicationId": "com.digitalsafe.mng.digitalsafe",
+  "applicationId": "com.digitalsafemng.digitalsafe",
   "remoteConfigUrl": "https://api2.blwsmartware.net/N219.json",
   "products": {
     "consumables": [
