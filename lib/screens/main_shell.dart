@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_strings.dart';
 import '../providers/shop_provider.dart';
+import '../widgets/ad_banner_slot.dart';
 import 'documents/add_document_screen.dart';
 import 'documents/documents_list_screen.dart';
 import 'home/home_screen.dart';
@@ -43,10 +44,16 @@ class _MainShellState extends State<MainShell> {
           SettingsScreen(embedded: true),
         ],
       ),
-      bottomNavigationBar: _BottomNav(
-        index: _index,
-        onTabChanged: (i) => setState(() => _index = i),
-        onAdd: _openAddDocument,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const AdBannerSlot(),
+          _BottomNav(
+            index: _index,
+            onTabChanged: (i) => setState(() => _index = i),
+            onAdd: _openAddDocument,
+          ),
+        ],
       ),
     );
   }

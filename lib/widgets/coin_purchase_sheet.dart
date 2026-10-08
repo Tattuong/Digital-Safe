@@ -16,12 +16,29 @@ class CoinPurchaseSheet {
     final shop = context.read<ShopProvider>();
     if (shop.isBillingDisabled) return;
 
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => const _CoinPurchaseSheet(),
-    );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    shop.releasePurchaseUi();
+    try {
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        showDragHandle: true,
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        builder: (ctx) {
+          final maxHeight = MediaQuery.sizeOf(ctx).height * 0.72;
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: const _CoinPurchaseSheet(),
+          );
+        },
+      );
+    } finally {
+      shop.releasePurchaseUi();
+    }
   }
 }
 
@@ -69,136 +86,139 @@ class _CoinPurchaseSheetState extends State<_CoinPurchaseSheet> {
   Widget build(BuildContext context) {
     final shop = context.watch<ShopProvider>();
     final products = shop.billing.products;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(color: AppColors.primary.withValues(alpha: 0.15), blurRadius: 32, offset: const Offset(0, -8)),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.viewInsetsOf(context).bottom + 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+          20, 4, 20, MediaQuery.viewInsetsOf(context).bottom + 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.accentGradient,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.star_rounded, color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(AppStrings.t(context, 'buyCoins'), style: AppTypography.titleLarge()),
-                        Text(
-                          AppStrings.t(context, 'buyCoinsDesc'),
-                          style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                ],
-              ),
-              const CoinPurchasePromoHeader(),
-              const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.coin.withValues(alpha: 0.12),
+                  gradient: AppColors.accentGradient,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.coin.withValues(alpha: 0.25)),
                 ),
-                child: Row(
+                child: const Icon(Icons.star_rounded,
+                    color: Colors.white, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.star_rounded, color: AppColors.coin, size: 20),
-                    const SizedBox(width: 8),
+                    Text(AppStrings.t(context, 'buyCoins'),
+                        style: AppTypography.titleLarge()),
                     Text(
-                      AppStrings.t(context, 'yourCoins', {'count': shop.coins.toString()}),
-                      style: AppTypography.labelBold(size: 14),
+                      AppStrings.t(context, 'buyCoinsDesc'),
+                      style: const TextStyle(
+                          color: AppColors.onSurfaceVariant, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              if (shop.configStatus == IapConfigStatus.networkError ||
-                  shop.configStatus == IapConfigStatus.timeout) ...[
-                const SizedBox(height: 12),
-                _StatusBanner(
-                  icon: Icons.wifi_off_outlined,
-                  text: shop.configStatus == IapConfigStatus.timeout
-                      ? AppStrings.t(context, 'configTimeout')
-                      : AppStrings.t(context, 'configNetworkError'),
-                  color: AppColors.warning,
-                ),
-              ],
-              if (shop.isPurchasing) ...[
-                const SizedBox(height: 24),
-                const Center(child: CircularProgressIndicator()),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    AppStrings.t(context, 'processingPurchase'),
-                    style: const TextStyle(color: AppColors.onSurfaceVariant),
-                  ),
-                ),
-              ] else if (!shop.billing.isAvailable) ...[
-                const SizedBox(height: 24),
-                _StatusBanner(
-                  icon: Icons.storefront_outlined,
-                  text: AppStrings.t(context, 'billingUnavailable'),
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ] else if (products.isEmpty) ...[
-                const SizedBox(height: 24),
-                _StatusBanner(
-                  icon: Icons.inventory_2_outlined,
-                  text: AppStrings.t(context, 'productsNotFound'),
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ] else ...[
-                const SizedBox(height: 16),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: products.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (ctx, i) => _PackTile(product: products[i], index: i),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 12),
-              Text(
-                AppStrings.t(context, 'earnCoinsHint'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 11),
-              ),
+              IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close)),
             ],
           ),
-        ),
+          const CoinPurchasePromoHeader(),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.coin.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.coin.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.star_rounded, color: AppColors.coin, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  AppStrings.t(
+                      context, 'yourCoins', {'count': shop.coins.toString()}),
+                  style: AppTypography.labelBold(size: 14),
+                ),
+              ],
+            ),
+          ),
+          if (shop.configStatus == IapConfigStatus.networkError ||
+              shop.configStatus == IapConfigStatus.timeout) ...[
+            const SizedBox(height: 12),
+            _StatusBanner(
+              icon: Icons.wifi_off_outlined,
+              text: shop.configStatus == IapConfigStatus.timeout
+                  ? AppStrings.t(context, 'configTimeout')
+                  : AppStrings.t(context, 'configNetworkError'),
+              color: AppColors.warning,
+            ),
+          ],
+          if (shop.isPurchasing) ...[
+            const SizedBox(height: 12),
+            const _PurchaseProgressRow(),
+          ],
+          if (!shop.billing.isAvailable) ...[
+            const SizedBox(height: 16),
+            _StatusBanner(
+              icon: Icons.storefront_outlined,
+              text: AppStrings.t(context, 'billingUnavailable'),
+              color: AppColors.onSurfaceVariant,
+            ),
+          ] else if (products.isEmpty) ...[
+            const SizedBox(height: 16),
+            _StatusBanner(
+              icon: Icons.inventory_2_outlined,
+              text: AppStrings.t(context, 'productsNotFound'),
+              color: AppColors.onSurfaceVariant,
+            ),
+          ] else
+            Flexible(
+              child: ListView.separated(
+                primary: false,
+                padding: const EdgeInsets.only(top: 16),
+                itemCount: products.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (ctx, i) =>
+                    _PackTile(product: products[i], index: i),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Text(
+            AppStrings.t(context, 'earnCoinsHint'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: AppColors.onSurfaceVariant, fontSize: 11),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _PurchaseProgressRow extends StatelessWidget {
+  const _PurchaseProgressRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          AppStrings.t(context, 'processingPurchase'),
+          style:
+              const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 13),
+        ),
+      ],
     );
   }
 }
@@ -211,7 +231,7 @@ class _PackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shop = context.read<ShopProvider>();
+    final shop = context.watch<ShopProvider>();
     final packIndex = IapConstants.coinPackIds.indexOf(product.id);
     final base = IapConstants.coinsForProduct(product.id);
     final total = shop.effectiveCoinsForPackIndex(packIndex);
@@ -232,7 +252,9 @@ class _PackTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: isHotDeal || isBestValue
-                ? Border.all(color: isHotDeal ? AppColors.coin : AppColors.primaryBlue, width: 2)
+                ? Border.all(
+                    color: isHotDeal ? AppColors.coin : AppColors.primaryBlue,
+                    width: 2)
                 : null,
           ),
           child: Row(
@@ -261,7 +283,8 @@ class _PackTile extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          AppStrings.t(context, 'coinPack', {'num': packNum.toString()}),
+                          AppStrings.t(
+                              context, 'coinPack', {'num': packNum.toString()}),
                           style: AppTypography.labelBold(size: 15),
                         ),
                         if (isHotDeal)
@@ -283,8 +306,10 @@ class _PackTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppStrings.t(context, 'coinAmountTotal', {'count': total.toString()}),
-                      style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12),
+                      AppStrings.t(context, 'coinAmountTotal',
+                          {'count': total.toString()}),
+                      style: const TextStyle(
+                          color: AppColors.onSurfaceVariant, fontSize: 12),
                     ),
                     if (bonus > 0)
                       Text(
@@ -292,7 +317,10 @@ class _PackTile extends StatelessWidget {
                           'base': base.toString(),
                           'bonus': bonus.toString(),
                         }),
-                        style: const TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                            color: AppColors.success,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600),
                       ),
                   ],
                 ),
@@ -335,7 +363,8 @@ class _Badge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 9),
+        style:
+            TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 9),
       ),
     );
   }
@@ -346,7 +375,8 @@ class _StatusBanner extends StatelessWidget {
   final String text;
   final Color color;
 
-  const _StatusBanner({required this.icon, required this.text, required this.color});
+  const _StatusBanner(
+      {required this.icon, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +391,8 @@ class _StatusBanner extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: TextStyle(color: color, fontSize: 13))),
+          Expanded(
+              child: Text(text, style: TextStyle(color: color, fontSize: 13))),
         ],
       ),
     );

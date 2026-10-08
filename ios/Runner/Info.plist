@@ -45,6 +45,10 @@
 	<string>Digital Safe needs camera access to scan and attach documents to your vault.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Digital Safe needs photo access to attach images to your vault.</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This allows the app to show ads that are more relevant to you.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

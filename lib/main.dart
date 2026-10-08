@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:provider/provider.dart';
 
+import 'core/constants/ad_constants.dart';
 import 'core/navigation/app_navigator.dart';
+import 'core/services/ad_service.dart';
 import 'core/services/storage_service.dart';
 import 'providers/locale_provider.dart';
 import 'providers/shop_provider.dart';
@@ -17,8 +23,16 @@ late final ThemeProvider appThemeProvider;
 late final LocaleProvider appLocaleProvider;
 late final VaultProvider appVaultProvider;
 
+void _useSystemPhotoPicker() {
+  final imagePicker = ImagePickerPlatform.instance;
+  if (imagePicker is ImagePickerAndroid) {
+    imagePicker.useAndroidPhotoPicker = true;
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _useSystemPhotoPicker();
   await GoogleFonts.pendingFonts([GoogleFonts.nunito()]);
   await StorageService.instance.init();
 
@@ -31,6 +45,9 @@ Future<void> main() async {
   appVaultProvider = VaultProvider();
 
   runApp(const DigitalSafeApp());
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (AdConstants.isConfigured) unawaited(AdService.init());
+  });
 }
 
 class DigitalSafeApp extends StatelessWidget {

@@ -3,7 +3,7 @@ description: Digital Safe - Kho lưu trữ cá nhân an toàn tuyệt đối.
 
 publish_to: "none"
 
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ">=3.4.3 <4.0.0"
@@ -29,7 +29,10 @@ dependencies:
   encrypt: ^5.0.3
   file_picker: ^8.3.7
   image_picker: ^1.1.2
+  image_picker_android: ^0.8.12
+  image_picker_platform_interface: ^2.10.0
   crypto: ^3.0.6
+  google_mobile_ads: ^5.3.1
 
 dev_dependencies:
   flutter_test:
